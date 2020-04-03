@@ -1,6 +1,7 @@
 #define CLOCK PINK
 #define CONT PINB
 #define STACK_SIZE 16
+#define WE PORTK
 
 struct Flags {
   bool c, z, i, d, b, v, n;
@@ -14,12 +15,12 @@ uint16_t *stack; //Set size?
 uint8_t reg[16]; 
 
 void setup() {
+  //Set Write Enable pin to write and Clock pin to read
+  DDRK = 0b00000010;
+  
   //Set address lines to write only
   DDRA = 0xFF;
   DDRC = 0xFF;
-
-  //Set clock pin to read only
-  DDRK = 0;
 
   //Set continue pin to read only
   DDRB = 0;
@@ -28,7 +29,7 @@ void setup() {
 }
 
 void loop() {
-  //Instruction set is 6502: https://www.masswerk.at/6502/6502_instruction_set.htm
+  //Instruction set is 6502: https://www.masswerk.at/6502/6502_instruction_set.html
   
   writeAddress(ptr++);
   uint8_t instr = readData();
@@ -1073,13 +1074,19 @@ inline void clearAddress() {
 }
 
 inline void writeData(uint8_t data) {
-  while (!CLOCK);
+  //Set WE
+  PORTK |= 0b00000010;
   
+  while (CLOCK);
+
   DDRL = 0xFF;
-  PORTL |= data;
+  PORTL = data;
 }
 
 inline uint8_t readData() {
+  //Clear WE
+  PORTK &= 0b11111101;
+  
   while (CLOCK);
   
   DDRL = 0;
