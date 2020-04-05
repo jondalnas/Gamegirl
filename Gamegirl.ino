@@ -28,6 +28,7 @@ void setup() {
   stack = (uint16_t*) malloc(STACK_SIZE * sizeof(uint16_t));
 }
 
+unsigned long micro = 0;
 void loop() {
   //Instruction set is 6502: https://www.masswerk.at/6502/6502_instruction_set.html
   
@@ -151,7 +152,11 @@ void loop() {
   case 0x20: //JSR abs
     *stack = ptr;
     stack++;
-    ptr = readAbs();
+
+    writeAddress(ptr++);
+    reg[0] = readData();
+    writeAddress(ptr++);
+    ptr = reg[0] | (readData() << 8);
     
     break;
   case 0x21: //AND X,ind
@@ -326,7 +331,10 @@ void loop() {
     flags.n = reg[1] & 0b10000000;
     break;
   case 0x4C: //JMP abs
-    ptr = readAbs();
+    writeAddress(ptr++);
+    reg[0] = readData();
+    writeAddress(ptr++);
+    ptr = reg[0] | (readData() << 8);
     
     break;
   case 0x4D: //EOR abs
@@ -428,7 +436,7 @@ void loop() {
     break;
   case 0x66: //ROR zpg
     reg[0] = readZpg();
-    reg[1] = reg[0] >> 1 | flags.c << 7;
+    reg[1] = (reg[0] >> 1) | (flags.c << 7);
     writeData(reg[1]);
 
     flags.c = reg[0] & 0b1;
@@ -466,8 +474,10 @@ void loop() {
     writeAddress(ptr++);
     reg[0] = readData();
     writeAddress(ptr++);
-    writeAddress(reg[0] | readData() << 8);
-    ptr = readData();
+    writeAddress(reg[0] | (readData() << 8));
+    reg[1] = readData();
+    writeAddress((reg[0] | (readData() << 8)) + 1);
+    ptr = reg[1] | (readData() << 8);
     
     break;
   case 0x6D: //ADC abs
@@ -483,7 +493,7 @@ void loop() {
     break;
   case 0x6E: //ROR abs
     reg[0] = readAbs();
-    reg[1] = reg[0] >> 1 | flags.c << 7;
+    reg[1] = (reg[0] >> 1) | (flags.c << 7);
     writeData(reg[1]);
 
     flags.c = reg[0] & 0b1;
@@ -557,7 +567,7 @@ void loop() {
     break;
   case 0x7E: //ROR abs,X
     reg[0] = readAbsx();
-    reg[1] = reg[0] >> 1 | flags.c;
+    reg[1] = (reg[0] >> 1) | flags.c;
     writeData(reg[1]);
 
     flags.c = reg[0] & 0b1;
@@ -1042,6 +1052,11 @@ void loop() {
     flags.c = reg[0] & 0b100000000;
     flags.z = !acc;
     flags.n = acc & 0b10000000;
+    break;
+  case 0xFA: //SLP impl - sleep till next frame
+    while(micros() - micro < 16666);
+    micro = micros();
+    
     break;
   case 0xFD: //SBC abs,X
     reg[0] = acc - readAbsx() - (1 - flags.c);
