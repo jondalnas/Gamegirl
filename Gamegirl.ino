@@ -55,7 +55,7 @@ void loop() {
     reg[1] = reg[0] << 1;
     writeData(reg[0]);
 
-    flags.c = reg[0] & 0b10000000;
+    flags.c = reg[1] & 0b10000000;
     flags.z = !reg[1];
     flags.n = reg[1] & 0b10000000;
     break;
@@ -95,7 +95,7 @@ void loop() {
     break;
   case 0x10: //BPL rel
     if (!flags.n) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -151,6 +151,7 @@ void loop() {
   case 0x20: //JSR abs
     *stack = ptr;
     stack++;
+    ptr = readAbs();
     
     break;
   case 0x21: //AND X,ind
@@ -160,9 +161,9 @@ void loop() {
     flags.n = acc & 0b10000000;
     break;
   case 0x24: //BIT zpg
-    reg[0] = readZpg() & readData();
+    reg[0] = readZpg();
 
-    flags.z = !reg[0];
+    flags.z = !(reg[0] & acc);
     flags.v = reg[0] & 0b01000000;
     flags.n = reg[0] & 0b10000000;
     break;
@@ -175,7 +176,7 @@ void loop() {
     break;
   case 0x26: //ROL zpg
     reg[0] = readZpg();
-    reg[1] = reg[0] << 1 | flags.c;
+    reg[1] = (reg[0] << 1) | flags.c;
     writeData(reg[1]);
 
     flags.c = reg[0] & 0b10000000;
@@ -196,19 +197,18 @@ void loop() {
     break;
   case 0x2A: //ROL A
     reg[0] = acc;
-    acc = reg[0] << 1 | flags.c;
+    acc = (reg[0] << 1) | flags.c;
 
     flags.c = reg[0] & 0b10000000;
     flags.z = !reg[0];
     flags.n = reg[0] & 0b10000000;
     break;
   case 0x2C: //BIT abs
-    reg[0] = acc & readAbs();
+    reg[0] = readAbs();
 
-    flags.z = !reg[0];
+    flags.z = !(reg[0] & acc);
     flags.n = reg[0] & 0b10000000;
     flags.v = reg[0] & 0b01000000;
-    
     break;
   case 0x2D: //AND abs
     acc &= readAbs();
@@ -218,7 +218,7 @@ void loop() {
     break;
   case 0x2E: //ROL abs
     reg[0] = readAbs();
-    reg[1] = reg[0] << 1 | flags.c;
+    reg[1] = (reg[0] << 1) | flags.c;
     writeData(reg[1]);
 
     flags.c = reg[0] & 0b10000000;
@@ -227,7 +227,7 @@ void loop() {
     break;
   case 0x30: //BMI rel
     if (flags.n) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -248,7 +248,7 @@ void loop() {
     break;
   case 0x36: //ROL zpg,X
     reg[0] = readZpgx();
-    reg[1] = reg[0] << 1 | flags.c;
+    reg[1] = (reg[0] << 1) | flags.c;
     writeData(reg[1]);
 
     flags.c = reg[0] & 0b10000000;
@@ -273,7 +273,7 @@ void loop() {
     break;
   case 0x3E: //ROL abs,X
     reg[0] = readAbsx();
-    reg[1] = reg[0] << 1 | flags.c;
+    reg[1] = (reg[0] << 1) | flags.c;
     writeData(reg[1]);
 
     flags.c = reg[0] & 0b10000000;
@@ -346,7 +346,7 @@ void loop() {
     break;
   case 0x50: //BVC rel
     if (!flags.v) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -401,7 +401,7 @@ void loop() {
     break;
   case 0x60: //RTS impl
     stack--;
-    ptr = *stack;
+    ptr = (*stack) + 1;
     
     break;
   case 0x61: //ADC X,ind
@@ -492,7 +492,7 @@ void loop() {
     break;
   case 0x70: //BVS rel
     if (flags.v) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -606,7 +606,7 @@ void loop() {
     break;
   case 0x90: //BCC rel
     if (!flags.c) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -724,7 +724,7 @@ void loop() {
     break;
   case 0xB0: //BCS rel
     if (flags.c) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -869,7 +869,7 @@ void loop() {
     break;
   case 0xD0: //BNE rel
     if (!flags.z) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -1001,7 +1001,7 @@ void loop() {
     break;
   case 0xF0: //BEQ rel
     if (!flags.z) {
-      writeAddress(ptr);
+      writeAddress(ptr++);
       ptr += (int8_t) readData();
     } else {
       ptr++;
@@ -1117,7 +1117,7 @@ inline void indy() {
 }
 
 inline void zpg() {
-  writeAddress(ptr);        //Init reading of oprand
+  writeAddress(ptr++);      //Init reading of oprand
   writeAddress(readData()); //Set address to oprand location
 }
 
