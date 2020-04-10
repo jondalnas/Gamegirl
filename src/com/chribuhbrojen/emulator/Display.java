@@ -49,6 +49,8 @@ public class Display extends Canvas {
 				
 				pixels[(col + ((row % 3) * 8)) + (row / 3) * SCREEN_WIDTH * 8] = color;
 			}
+			
+			screen[row] = 0;
 		}
 
 		g.drawImage(img, 0, 0, this.getWidth(), this.getHeight(), null);

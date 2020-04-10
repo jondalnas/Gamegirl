@@ -25,6 +25,10 @@ public class Compile {
 			
 			if (line.startsWith(";") || line.isEmpty()) continue;
 			
+			if (line.contains(";")) {
+				line = line.substring(0, line.indexOf(';'));
+			}
+			
 			if (line.contains(":")) {
 				labels.put(line.substring(0, line.indexOf(':')), pc);
 				
@@ -32,9 +36,39 @@ public class Compile {
 			}
 
 			String instr = line.split(" ")[0];
-			String opc = line.contains(" ") ? ((line.contains("$") || line.contains("#") || (line.endsWith("A") && line.length() == 5)) ? line.split(" ")[1] : "$" + Integer.toHexString(labels.get(line.split(" ")[1]))) : "";
-			
 			Instructions instruction = Instructions.valueOf(instr);
+			
+			String opc = line.contains(" ") ? ((line.contains("$") || line.contains("#") || (line.endsWith("A") && line.length() == 5)) ? 
+					line.split(" ")[1] : 
+					((instruction == Instructions.BCC || instruction == Instructions.BCS || instruction == Instructions.BEQ || instruction == Instructions.BMI ||
+					instruction == Instructions.BNE || instruction == Instructions.BPL || instruction == Instructions.BVC || instruction == Instructions.BVS) ? 
+							"$00" : "$0000")) : "";
+			Opcodes opcode = Opcodes.match(opc);
+
+			pc += opcode.length;
+		}
+		
+		scan = new Scanner(Compile.class.getResourceAsStream(file));
+		
+		pc = 0x2000;
+		while(scan.hasNextLine()) {
+			String line = scan.nextLine();
+			line = line.replace("	", "");
+			
+			if (line.startsWith(";") || line.isEmpty() || line.contains(":")) continue;
+			
+			if (line.contains(";")) {
+				line = line.substring(0, line.indexOf(';'));
+			}
+
+			String instr = line.split(" ")[0];
+			Instructions instruction = Instructions.valueOf(instr);
+			
+			String opc = line.contains(" ") ? ((line.contains("$") || line.contains("#") || (line.endsWith("A") && line.length() == 5)) ? 
+					line.split(" ")[1] : 
+					((instruction == Instructions.BCC || instruction == Instructions.BCS || instruction == Instructions.BEQ || instruction == Instructions.BMI ||
+					instruction == Instructions.BNE || instruction == Instructions.BPL || instruction == Instructions.BVC || instruction == Instructions.BVS) ? 
+							"$" + Integer.toHexString((0x100 + (labels.get(line.split(" ")[1]) - (pc + 2))) & 0xFF) : "$" + Integer.toHexString(labels.get(line.split(" ")[1])))) : "";
 			Opcodes opcode = Opcodes.match(opc);
 			
 			if (instruction == Instructions.BCC ||instruction == Instructions.BCS ||instruction == Instructions.BEQ ||instruction == Instructions.BMI ||
@@ -79,8 +113,10 @@ public class Compile {
 				if (opcode == Opcodes.ABS || opcode == Opcodes.ABSX || opcode == Opcodes.ABSY || opcode == Opcodes.IND) 
 					write += " " + opc.substring(opc.indexOf('$')+3, opc.indexOf('$')+5) + " " + opc.substring(opc.indexOf('$')+1, opc.indexOf('$')+3);
 				else if (opcode == Opcodes.XIND || opcode == Opcodes.INDY || opcode == Opcodes.REL || opcode == Opcodes.ZPG || opcode == Opcodes.ZPGX || opcode == Opcodes.ZPGY) 
-					write += " " + opc.substring(opc.indexOf('$')+1, opc.indexOf('$')+3);
+					write += " " + opc.substring(opc.indexOf('$')+1, opc.indexOf('$')+3 > opc.length() ? opc.length() : opc.indexOf('$')+3);
 			}
+			
+			write = write.toUpperCase();
 			
 			System.out.println(write);
 			pc += opcode.length;

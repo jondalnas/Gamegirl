@@ -131,8 +131,12 @@ public class Main implements Runnable {
 				break;
 			case 0x10: //BPL rel
 				if (!flags.n) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -260,8 +264,12 @@ public class Main implements Runnable {
 				break;
 			case 0x30: //BMI rel
 				if (flags.n) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -381,8 +389,12 @@ public class Main implements Runnable {
 				break;
 			case 0x50: //BVC rel
 				if (!flags.v) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -526,8 +538,12 @@ public class Main implements Runnable {
 				break;
 			case 0x70: //BVS rel
 				if (flags.v) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -641,8 +657,12 @@ public class Main implements Runnable {
 				break;
 			case 0x90: //BCC rel
 				if (!flags.c) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -756,8 +776,12 @@ public class Main implements Runnable {
 				break;
 			case 0xB0: //BCS rel
 				if (flags.c) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -903,8 +927,12 @@ public class Main implements Runnable {
 				break;
 			case 0xD0: //BNE rel
 				if (!flags.z) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -1041,8 +1069,12 @@ public class Main implements Runnable {
 				break;
 			case 0xF0: //BEQ rel
 				if (!flags.z) {
-					pc += read(pc++);
-					pc &= 0xFF;
+					int val = read(pc++);
+					if ((val & 0b10000000) == 0) {
+						pc += val;
+					} else {
+						pc -= (~val) + 1;
+					}
 				} else {
 					pc++;
 				}
@@ -1268,7 +1300,8 @@ public class Main implements Runnable {
 			int bottom = address & 0x7FF;
 			switch(top) {
 			case 0b00:	//RAM
-				memory.write(bottom, address);
+				memory.write(bottom, data);
+				break;
 				
 			case 0b01:	//ARAM
 				break; //return audio.write(bottom);
