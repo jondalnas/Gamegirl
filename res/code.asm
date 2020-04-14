@@ -13,7 +13,8 @@
 ; $0005: Ball y
 ; $0006: Ball sub-y
 ; $0007: Ball velocity y
-; $0008-$0009: Score
+; $0008: Controller value
+; $0009-$000A: Score
 ; $07D0-$07FF: Level
 
 	;-----INIT-----
@@ -33,13 +34,18 @@ mainLoop:
 	
 	;-----MOVE PADDLE-----
 	LDA $1000		; Load controler x value
-	BEQ rightCheck	; Branch if controlstick is held right (#0)
-	AND #%00010000	; And controler value to get if it is held left
-	BEQ skipCheck	; Controler isn't held in any direction, so skip check
+	JSR mux			; Get position of thumbstick (0-8)
+	SBC #4			; Center value, so netural is 0
+	
+	BMI rightCheck	; If minus, then controller direction is right
+	BEQ skipCheck	; If 0 then skip
 	
 	;-----LEFT-----
-	INC $01			; Add one to subpos of paddle
-	CMP #$10		; Cehck if paddle subpos is greater than or equals to 16
+	STA $08
+	
+	LDA $01			; Load subpos of paddle into accumulator
+	ADC $08			; Add controller value to subpos of paddle
+	CMP #$10		; Check if paddle subpos is greater than or equals to 16
 	BCC skipCheck
 	CLC
 	LDX #0
@@ -55,8 +61,13 @@ mainLoop:
 
 rightCheck:
 	;-----RIGHT-----
-	INC $01			; Add one to subpos of paddle
-	CMP #$10		; Cehck if paddle subpos is greater than or equals to 16
+	EOR #%11111111	; Invert all bits to make positive
+	ADC #1			; Add one to because of two compliment
+	STA $08
+	
+	LDA $01			; Load subpos of paddle into accumulator
+	ADC $08			; Add controller value to subpos of paddle
+	CMP #$10		; Check if paddle subpos is greater than or equals to 16
 	BCC skipCheck
 	CLC
 	LDX #0
@@ -97,8 +108,8 @@ skipCheck:
 	
 yMoveBall:
 	CLC
-	LDA $06			; Load balls sub y position
-	ADC $07			; Add velocity to sub y position
+	LDA $06				; Load balls sub y position
+	ADC $07				; Add velocity to sub y position
 	BVC skipBallMove	; If sub position didn't under, or overflow, then ball didn't move
 	
 	
@@ -114,7 +125,71 @@ skipBallMove:
 	STA $1800		; Store row value to VRAM
 
 	TXA				; Transfer paddle pos to A
-	AND #%00000111	; Get the lowest three bits of paddle pos (Position on row)
+	JSR demux		; Demux position of paddle
 	STA $1801		; Store paddle inter-pos to VRAM
 	
 	JMP mainLoop
+	
+demux:
+	; Set bit, in accumulator, corosponding to three first bits in accumulator
+	AND #%00000111
+	TAY
+	BNE demuxOne	; Brach if number is not 0
+	LDA #%00000001	; Set bit 0 in accumulator 
+	RTS
+	
+demuxOne:
+	CPY #%00000001
+	BNE demuxTwo	; Branch if number is not 1
+	LDA #%00000010	; Set bit 1 in accumulator 
+	RTS
+
+demuxTwo:
+	CPY #%00000000
+	BNE demuxThree	; Brach if number is not 2
+	LDA #%00000100	; Set bit 2 in accumulator 
+	RTS
+
+demuxThree:
+	CPY #%00000000
+	BNE demuxFour	; Brach if number is not 3
+	LDA #%00001000	; Set bit 3 in accumulator 
+	RTS
+
+demuxFour:
+	CPY #%00000000
+	BNE demuxFive	; Brach if number is not 4
+	LDA #%00010000	; Set bit 4 in accumulator 
+	RTS
+
+demuxFive:
+	CPY #%00000000
+	BNE demuxSix	; Brach if number is not 5
+	LDA #%00100000	; Set bit 5 in accumulator 
+	RTS
+
+demuxSix:
+	CPY #%00000000
+	BNE demuxSeven	; Brach if number is not 6
+	LDA #%01000000	; Set bit 6 in accumulator 
+	RTS
+
+demuxSeven:
+	LDA #%10000000	; Set bit 7 in accumulator 
+	RTS
+	
+	
+mux:
+	; Get position of last set bit in acxumulator
+	LDX #0			; Set bit pos register To 0
+	CMP #0			; Compare mux byte to 0
+
+muxLoop:
+	BEQ endMux		; Check if mux byte is zero (has hit last set bit)
+	INX				; Increment bit pos register
+	LSR A			; Right shift mux byte
+	BPL muxLoop		; Same as JMP, but one cycle faster (mux byte is always positive)
+
+endMux:
+	TXA				; Transfer pos of last set bit to accumulator
+	RTS

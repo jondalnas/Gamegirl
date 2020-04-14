@@ -14,6 +14,8 @@ public class Main implements Runnable {
 		display = new Display();
 		controller = new Controller();
 		memory = new Memory();
+		
+		display.addKeyListener(controller);
 	}
 	
 	public static void main(String[] args) {
@@ -68,12 +70,12 @@ public class Main implements Runnable {
 		long nanoSleep = System.nanoTime();
 		while(true) {
 			int instr = read(pc++);
-			System.out.println(Integer.toHexString(instr));
 
 			switch(instr) {
 			case 0x00: //BRK impl
-				while(true);
+				//while(true);
 				//while(!CONT); TODO: Add debugging
+				break;
 				
 			case 0x01: //ORA X,ind
 				acc |= readXind();
@@ -451,7 +453,7 @@ public class Main implements Runnable {
 				flags.n = (reg[1] & 0b10000000) != 0;
 				break;
 			case 0x60: //RTS impl
-				pc = stack.pop() + 1;
+				pc = stack.pop() + 2;
 				
 				break;
 			case 0x61: //ADC X,ind
@@ -1068,7 +1070,7 @@ public class Main implements Runnable {
 				flags.n = (reg[0] & 0b10000000) != 0;
 				break;
 			case 0xF0: //BEQ rel
-				if (!flags.z) {
+				if (flags.z) {
 					int val = read(pc++);
 					if ((val & 0b10000000) == 0) {
 						pc += val;

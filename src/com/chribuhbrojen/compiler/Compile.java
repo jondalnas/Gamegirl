@@ -1,5 +1,9 @@
 package com.chribuhbrojen.compiler;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -10,11 +14,30 @@ import com.chribuhbrojen.emulator.Memory;
 
 public class Compile {
 	public static void main(String[] args) {
-		loadCode("/code.asm");
+		try {
+			loadCode("/code.asm");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
-	private static void loadCode(String file) {
+	private static void loadCode(String file) throws IOException {
 		Scanner scan = new Scanner(Compile.class.getResourceAsStream(file));
+		
+		File out;
+		try {
+			out = new File(Compile.class.getResource("/code.bin").toURI());
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+		
+		FileWriter fw;
+		try {
+			fw = new FileWriter(out);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		fw.write("");
 		
 		Map<String, Integer> labels = new HashMap<String, Integer>();
 		
@@ -118,8 +141,12 @@ public class Compile {
 			
 			write = write.toUpperCase();
 			
+			fw.append(write + "\n");
+			
 			System.out.println(write);
 			pc += opcode.length;
 		}
+		
+		fw.close();
 	}
 }
