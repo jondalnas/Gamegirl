@@ -7,15 +7,11 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.chribuhbrojen.emulator.Memory;
 
 public class Compile {
 	public static void main(String[] args) {
 		try {
-			loadCode("/code.asm");
+			loadCode("/Breakout.asm");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

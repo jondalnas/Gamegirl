@@ -48,6 +48,7 @@ public enum Instructions {
 	SEC(new char[] {'3'},		new char[] {'8'}),
 	SED(new char[] {'F'},		new char[] {'8'}),
 	SEI(new char[] {'7'},		new char[] {'8'}),
+	SLP(new char[] {'F'},		new char[] {'A'}),
 	STA(new char[] {'8', '9'},	new char[] {'1', '5', '9', 'D'}),
 	STX(new char[] {'8', '9'},	new char[] {'6', 'E'}),
 	STY(new char[] {'8', '9'},	new char[] {'4', 'C'}),

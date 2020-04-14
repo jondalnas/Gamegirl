@@ -7,7 +7,7 @@ public class Controller implements KeyListener {
 	public int[] IORAM = new int[4];
 	
 	public Controller() {
-		IORAM[0] = 0b00011111;
+		IORAM[0] = 0b00001111;
 	}
 	
 	public void keyPressed(KeyEvent e) {

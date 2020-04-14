@@ -941,12 +941,15 @@ void loop() {
     flags.n = reg[0] & 0b10000000;
     break;
   case 0xE1: //SBC X,ind
-    reg[0] = acc - readXind() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readXind();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xE4: //CPX zpg
     reg[0] = x - readZpg();
@@ -956,12 +959,15 @@ void loop() {
     flags.n = reg[0] & 0b10000000;
     break;
   case 0xE5: //SBC zpg
-    reg[0] = acc - readZpg() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readZpg();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xE6: //INC zpg
     reg[0] = readZpg();
@@ -978,12 +984,15 @@ void loop() {
     break;
   case 0xE9: //SBC #
     writeAddress(ptr++);
-    reg[0] = acc - readData() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readData();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xEA: //NOP impl
     break;
@@ -995,12 +1004,15 @@ void loop() {
     flags.n = reg[0] & 0b10000000;
     break;
   case 0xED: //SBC abs
-    reg[0] = acc - readAbs() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readAbs();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xEE: //INC abs
     reg[0] = readAbs();
@@ -1019,20 +1031,26 @@ void loop() {
     
     break;
   case 0xF1: //SBC ind,Y
-    reg[0] = acc - readIndy() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readIndy();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xF5: //SBC zpg,X
-    reg[0] = acc - readZpgx() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readZpgx();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xF6: //INC zpg,X
     reg[0] = readZpgx();
@@ -1046,12 +1064,15 @@ void loop() {
     
     break;
   case 0xF9: //SBC abs,Y
-    reg[0] = acc - readAbsy() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readAbsy();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xFA: //SLP impl - sleep till next frame
     while(micros() - micro < 16666);
@@ -1059,12 +1080,15 @@ void loop() {
     
     break;
   case 0xFD: //SBC abs,X
-    reg[0] = acc - readAbsx() - (1 - flags.c);
-    acc = reg[0];
-
-    flags.c = reg[0] & 0b100000000;
+    reg[0] = readAbsx();
+    reg[1] = acc;
+    reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
+    acc = reg[2];
+    
     flags.z = !acc;
-    flags.n = acc & 0b10000000;
+    flags.n = (acc & 0b10000000);
+    flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
+    flags.n = (acc & 0b10000000);
     break;
   case 0xFE: //INC abs,X
     reg[0] = readAbsx();
