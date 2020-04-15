@@ -418,7 +418,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -429,7 +429,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -457,7 +457,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -486,7 +486,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -515,7 +515,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -526,7 +526,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -549,7 +549,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -560,7 +560,7 @@ void loop() {
     reg[2] = reg[1] + reg[0] + flags.c;
     acc = reg[2];
 
-    flags.c = reg[0] & 0b100000000;
+    flags.c = reg[2] & 0b100000000;
     flags.z = !acc;
     flags.v = ((reg[0] | reg[1]) ^ acc) & 0b10000000;
     flags.n = acc & 0b10000000;
@@ -947,7 +947,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;
@@ -965,7 +965,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;
@@ -990,7 +990,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;
@@ -1010,7 +1010,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;
@@ -1037,7 +1037,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;
@@ -1048,7 +1048,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;
@@ -1070,7 +1070,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;
@@ -1086,7 +1086,7 @@ void loop() {
     acc = reg[2];
     
     flags.z = !acc;
-    flags.n = (acc & 0b10000000);
+    flags.c = (reg[2] & 0b100000000);
     flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000);
     flags.n = (acc & 0b10000000);
     break;

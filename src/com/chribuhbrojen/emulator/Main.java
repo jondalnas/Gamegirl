@@ -472,21 +472,21 @@ public class Main implements Runnable {
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2] & 0b11111111;
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x65: //ADC zpg
 				reg[0] = readZpg();
 				reg[1] = acc;
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2] & 0b11111111;
-				
+
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x66: //ROR zpg
 				reg[0] = readZpg();
@@ -508,11 +508,11 @@ public class Main implements Runnable {
 				reg[1] = acc;
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2];
-				
+
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x6A: //ROR A
 				reg[0] = acc;
@@ -533,11 +533,11 @@ public class Main implements Runnable {
 				reg[1] = acc;
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2] & 0b11111111;
-				
+
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x6E: //ROR abs
 				reg[0] = readAbs();
@@ -566,22 +566,22 @@ public class Main implements Runnable {
 				reg[1] = acc;
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2] & 0b11111111;
-				
+
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x75: //ADC zpg,X
 				reg[0] = readZpgx();
 				reg[1] = acc;
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2] & 0b11111111;
-				
+
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x76: //ROR zpg,X
 				reg[0] = readZpgx();
@@ -600,22 +600,22 @@ public class Main implements Runnable {
 				reg[1] = acc;
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2];
-				
+
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x7D: //ADC abs,X
 				reg[0] = readAbsx();
 				reg[1] = acc;
 				reg[2] = reg[1] + reg[0] + (flags.c ? 1 : 0);
 				acc = reg[2];
-				
+
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x7E: //ROR abs,X
 				reg[0] = readAbsx();
@@ -1009,13 +1009,13 @@ public class Main implements Runnable {
 				reg[0] = readXind();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xE4: //CPX zpg
 				reg[0] = x - readZpg();
@@ -1028,13 +1028,13 @@ public class Main implements Runnable {
 				reg[0] = readZpg();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xE6: //INC zpg
 				reg[0] = (readZpg() + 1) & 0xFF;
@@ -1054,13 +1054,13 @@ public class Main implements Runnable {
 				reg[0] = read(pc++);
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xEA: //NOP impl
 				break;
@@ -1075,13 +1075,13 @@ public class Main implements Runnable {
 				reg[0] = readAbs();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xEE: //INC abs
 				reg[0] = (readAbs() + 1) & 0xFF;
@@ -1107,25 +1107,25 @@ public class Main implements Runnable {
 				reg[0] = readIndy();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xF5: //SBC zpg,X
 				reg[0] = readZpgx();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xF6: //INC zpg,X
 				reg[0] = (readZpgx() + 1) & 0xFF;
@@ -1142,13 +1142,13 @@ public class Main implements Runnable {
 				reg[0] = readAbsy();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xFA:
 				while (System.nanoTime() - nanoSleep < 1e9/60);
@@ -1159,13 +1159,13 @@ public class Main implements Runnable {
 				reg[0] = readAbsx();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[2] += 0x100;
-				acc = reg[2];
+				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
+				acc = reg[3];
 				
+				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
 				flags.v = (((reg[0] | reg[1]) ^ acc) & 0b10000000) != 0;
-				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0xFE: //INC abs,X
 				reg[0] = (readAbsx() + 1) & 0xFF;

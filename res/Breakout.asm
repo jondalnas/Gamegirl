@@ -14,7 +14,7 @@
 ; $0006: Ball sub-y
 ; $0007: Ball velocity y
 ; $0008: Controller value
-; $0009-$000A: Score
+; $0009: Paddle interbyte value
 ; $07D0-$07FF: Level
 
 	;-----INIT-----
@@ -55,7 +55,6 @@ mainLoop:
 	
 	LDA $00			; Load value of paddle
 	SBC #1			; Move paddle one left
-	BRK
 	BVC padGreZero	; Branch to store paddle position, if paddle isn't off screen (paddle pos < 0)
 	LDA #0			; Set paddle pos to 0
 padGreZero:
@@ -81,7 +80,7 @@ rightCheck:
 	LDA $00			; Load value of paddle
 	ADC #1			; Move paddle one right
 	CMP #22			; Compare paddle pos to 22 (Off screen)
-	BVC padLsTwnThr	; Branch to store paddle position, if paddle isn't off screen
+	BMI padLsTwnThr	; Branch to store paddle position, if paddle isn't off screen
 	LDA #21			; Set paddle pos to 21
 padLsTwnThr:
 	STA $00			; Store paddle position
@@ -124,16 +123,51 @@ skipBallMove:
 	;-----RENDER-----
 	LDX $00			; Copy paddle pos to X
 	TXA				; Transfer paddle pos to A
+	
 	LSR A			; Divide paddle pos with 8 (A >> 3), this should then be the row number
 	LSR A
 	LSR A
 	CLC
 	ADC #45			; Offset paddle row to last row
 	STA $1800		; Store row value to VRAM
+	TAY				; Store row number to Y
 
 	TXA				; Transfer paddle pos to A
 	JSR demux		; Demux position of paddle
-	STA $1801		; Store paddle inter-pos to VRAM
+	STA $09			; Store paddle position
+	CMP #%01000000	; Cehck if paddle crosses row
+	BPL changeRow
+	ASL $09			; Left shift paddle to get next position
+	ORA $09			; Or with current position, to get whole paddle
+	ASL $09
+	ORA $09
+	
+	STA $1801		; Render paddle
+	JMP paddleRenderEnd
+changeRow:
+	BEQ oneOnNext	; If paddle pos is equal to %01000000, then only render one dot on next row, else render two
+	LDA #%10000000	; Load value for row with only one dot on it
+	STA $1801		; Render part of paddle
+	INY				; Incriment paddle row to 
+	STY $1800		; Store new row to VRAM
+	LDA #%00000011	; Load value for row with two dots on it
+	STA $1801		; Render second part of paddle
+	JMP paddleRenderEnd
+	
+oneOnNext:
+	LDA #%11000000	; Load value for row with two dots on it
+	STA $1801		; Render part of paddle
+	INY				; Incriment paddle row to 
+	STY $1800		; Store new row to VRAM
+	LDA #%00000001	; Load value for row with only one dot on it
+	STA $1801		; Render second part of paddle
+	
+paddleRenderEnd:
+	
+	;-----RENDER BALL-----
+	
+	;-----RENDER LEVEL-----
+	
 	
 	SLP
 	JMP mainLoop
@@ -141,43 +175,43 @@ skipBallMove:
 demux:
 	; Set bit, in accumulator, corosponding to three first bits in accumulator
 	AND #%00000111
-	TAY
+	TAX
 	BNE demuxOne	; Brach if number is not 0
 	LDA #%00000001	; Set bit 0 in accumulator 
 	RTS
 	
 demuxOne:
-	CPY #%00000001
+	CPX #%00000001
 	BNE demuxTwo	; Branch if number is not 1
 	LDA #%00000010	; Set bit 1 in accumulator 
 	RTS
 
 demuxTwo:
-	CPY #%00000010
+	CPX #%00000010
 	BNE demuxThree	; Brach if number is not 2
 	LDA #%00000100	; Set bit 2 in accumulator 
 	RTS
 
 demuxThree:
-	CPY #%00000011
+	CPX #%00000011
 	BNE demuxFour	; Brach if number is not 3
 	LDA #%00001000	; Set bit 3 in accumulator 
 	RTS
 
 demuxFour:
-	CPY #%00000100
+	CPX #%00000100
 	BNE demuxFive	; Brach if number is not 4
 	LDA #%00010000	; Set bit 4 in accumulator 
 	RTS
 
 demuxFive:
-	CPY #%00000101
+	CPX #%00000101
 	BNE demuxSix	; Brach if number is not 5
 	LDA #%00100000	; Set bit 5 in accumulator 
 	RTS
 
 demuxSix:
-	CPY #%00000110
+	CPX #%00000110
 	BNE demuxSeven	; Brach if number is not 6
 	LDA #%01000000	; Set bit 6 in accumulator 
 	RTS
