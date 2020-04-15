@@ -1168,20 +1168,28 @@ inline void abso() {
 }
 
 inline void zpgx() {
-  writeAddress(readZpg() + x);
+  writeAddress(ptr++);          //Init reading of oprand
+  writeAddress(readData() + x); //Set address to oprand location plus x
 }
 
 inline void zpgy() {
-  writeAddress(readZpg() + y);
+  writeAddress(ptr++);          //Init reading of oprand
+  writeAddress(readData() + x); //Set address to oprand location plus y
 }
 
 
 inline void absx() {
-  writeAddress(readAbs() + x);
+  writeAddress(ptr++);                          //Init reading of lower oprand
+  reg[0] = readData();                          //Read lower oprand and store to register 0
+  writeAddress(ptr++);                          //Init reading of higher oprand
+  writeAddress((reg[0] | readData() << 8) + x); //Combine lower oprand, higher oprand and add x and set address to that location
 }
 
 inline void absy() {
-  writeAddress(readAbs() + y);
+  writeAddress(ptr++);                          //Init reading of lower oprand
+  reg[0] = readData();                          //Read lower oprand and store to register 0
+  writeAddress(ptr++);                          //Init reading of higher oprand
+  writeAddress((reg[0] | readData() << 8) + y); //Combine lower oprand, higher oprand and y and set address to that location
 }
 
 //Read

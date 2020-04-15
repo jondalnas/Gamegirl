@@ -28,7 +28,7 @@ public class Display extends Canvas {
 		if ((address & 1) == 0) {
 			rowRegister = data;
 		} else {
-			screen[rowRegister] = data;
+			screen[rowRegister] |= data;
 		}
 	}
 	
