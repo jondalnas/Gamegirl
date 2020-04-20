@@ -1,9 +1,13 @@
 package com.chribuhbrojen.emulator;
 
 import java.awt.Panel;
+import java.io.IOException;
 import java.util.Stack;
 
 import javax.swing.JFrame;
+
+import com.chribuhbrojen.compiler.Compile;
+import com.chribuhbrojen.compiler.Instructions;
 
 public class Main implements Runnable {
 	public static Display display;
@@ -19,6 +23,12 @@ public class Main implements Runnable {
 	}
 	
 	public static void main(String[] args) {
+		try {
+			Compile.loadCode("/Breakout.asm");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
 		Main main = new Main();
 		
 		Panel panel = new Panel();
@@ -49,13 +59,13 @@ public class Main implements Runnable {
 		}
 		
 		public void set(int integer) {
-			c = (integer & 0b00000001) == 1;
-			z = (integer & 0b00000010) == 1;
-			i = (integer & 0b00000100) == 1;
-			d = (integer & 0b00001000) == 1;
-			b = (integer & 0b00010000) == 1;
-			v = (integer & 0b00100000) == 1;
-			n = (integer & 0b01000000) == 1;
+			c = (integer & 0b00000001) != 0;
+			z = (integer & 0b00000010) != 0;
+			i = (integer & 0b00000100) != 0;
+			d = (integer & 0b00001000) != 0;
+			b = (integer & 0b00010000) != 0;
+			v = (integer & 0b00100000) != 0;
+			n = (integer & 0b01000000) != 0;
 		}
 	}
 
@@ -72,6 +82,8 @@ public class Main implements Runnable {
 		while(true) {
 			int instr = read(pc++);
 
+			System.out.println(Instructions.findInstruction(Integer.toHexString(instr)));
+
 			switch(instr) {
 			case 0x00: //BRK impl
 				//while(true);
@@ -81,7 +93,7 @@ public class Main implements Runnable {
 				System.out.println("ACC: " + acc);
 				System.out.println("X: " + x);
 				System.out.println("Y: " + y);
-				System.out.println("       CZIDBVN");
+				System.out.println("       NVBDIZC");
 				System.out.print("Flags: ");
 				for (int i = 0; i < 7-Integer.toBinaryString(flags.toInt()).length(); i++) System.out.print(0);
 				System.out.println(Integer.toBinaryString(flags.toInt()));
@@ -119,12 +131,12 @@ public class Main implements Runnable {
 				flags.n = (acc & 0b10000000) != 0;
 				break;
 			case 0x0A: //ASL A
-				acc <<= 1;
-				acc &= 0b11111111;
+				reg[0] = acc << 1;
+				acc = reg[0] & 0b11111111;
 				
 				flags.z = acc == 0;
 				flags.n = (acc & 0b10000000) != 0;
-				flags.c = (reg[0] & 0b10000000) != 0;
+				flags.c = (reg[0] & 0b100000000) != 0;
 				break;
 			case 0x0D: //ORA abs
 				acc |= readAbs();
@@ -280,7 +292,7 @@ public class Main implements Runnable {
 					if ((val & 0b10000000) == 0) {
 						pc += val;
 					} else {
-						pc -= (~val) + 1;
+						pc -= ((~val) & 0xFF) + 1;
 					}
 				} else {
 					pc++;
@@ -405,7 +417,7 @@ public class Main implements Runnable {
 					if ((val & 0b10000000) == 0) {
 						pc += val;
 					} else {
-						pc -= (~val) + 1;
+						pc -= ((~val) & 0xFF) + 1;
 					}
 				} else {
 					pc++;
@@ -554,7 +566,7 @@ public class Main implements Runnable {
 					if ((val & 0b10000000) == 0) {
 						pc += val;
 					} else {
-						pc -= (~val) + 1;
+						pc -= ((~val) & 0xFF) + 1;
 					}
 				} else {
 					pc++;
@@ -673,7 +685,7 @@ public class Main implements Runnable {
 					if ((val & 0b10000000) == 0) {
 						pc += val;
 					} else {
-						pc -= (~val) + 1;
+						pc -= ((~val) & 0xFF) + 1;
 					}
 				} else {
 					pc++;
@@ -792,7 +804,7 @@ public class Main implements Runnable {
 					if ((val & 0b10000000) == 0) {
 						pc += val;
 					} else {
-						pc -= (~val) + 1;
+						pc -= ((~val) & 0xFF) + 1;
 					}
 				} else {
 					pc++;
@@ -943,7 +955,7 @@ public class Main implements Runnable {
 					if ((val & 0b10000000) == 0) {
 						pc += val;
 					} else {
-						pc -= (~val) + 1;
+						pc -= ((~val) & 0xFF) + 1;
 					}
 				} else {
 					pc++;
@@ -1009,8 +1021,8 @@ public class Main implements Runnable {
 				reg[0] = readXind();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0x100;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1028,8 +1040,8 @@ public class Main implements Runnable {
 				reg[0] = readZpg();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0x100;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1054,8 +1066,8 @@ public class Main implements Runnable {
 				reg[0] = read(pc++);
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0xF00;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1075,8 +1087,8 @@ public class Main implements Runnable {
 				reg[0] = readAbs();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0x100;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1096,7 +1108,7 @@ public class Main implements Runnable {
 					if ((val & 0b10000000) == 0) {
 						pc += val;
 					} else {
-						pc -= (~val) + 1;
+						pc -= ((~val) & 0xFF) + 1;
 					}
 				} else {
 					pc++;
@@ -1107,8 +1119,8 @@ public class Main implements Runnable {
 				reg[0] = readIndy();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0x100;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1119,8 +1131,8 @@ public class Main implements Runnable {
 				reg[0] = readZpgx();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0x100;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1142,8 +1154,8 @@ public class Main implements Runnable {
 				reg[0] = readAbsy();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0x100;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1159,8 +1171,8 @@ public class Main implements Runnable {
 				reg[0] = readAbsx();
 				reg[1] = acc;
 				reg[2] = acc - reg[0] - (flags.c ? 1 : 0);
-				if (reg[2] < 0) reg[3] = reg[2] + 0x100;
-				acc = reg[3];
+				if (reg[2] < 0) reg[2] += 0x100;
+				acc = reg[2] & 0b11111111;
 				
 				flags.c = (reg[2] & 0b100000000) != 0;
 				flags.z = acc == 0;
@@ -1183,7 +1195,7 @@ public class Main implements Runnable {
 			
 			try {
 				int diff = (int) (System.nanoTime() - nanoInst);
-				if (diff > 250) diff = 250;
+				if (diff > 250 || diff < 0) diff = 250;
 				Thread.sleep(0, 250 - diff);
 				nanoInst = System.nanoTime();
 			} catch (InterruptedException e) {
@@ -1215,20 +1227,20 @@ public class Main implements Runnable {
 	}
 
 	private int zpgx() {
-		return readZpg() + x;
+		return zpg() + x;
 	}
 
 	private int zpgy() {
-		return readZpg() + y;
+		return zpg() + y;
 	}
 
 
 	private int absx() {
-		return readAbs() + x;
+		return abs() + x;
 	}
 
 	private int absy() {
-		return readAbs() + y;
+		return abs() + y;
 	}
 
 	//Read

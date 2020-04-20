@@ -17,7 +17,7 @@ public class Compile {
 		}
 	}
 	
-	private static void loadCode(String file) throws IOException {
+	public static void loadCode(String file) throws IOException {
 		Scanner scan = new Scanner(Compile.class.getResourceAsStream(file));
 		
 		File out;

@@ -54,6 +54,12 @@ public class Display extends Canvas {
 		}
 
 		g.drawImage(img, 0, 0, this.getWidth(), this.getHeight(), null);
+
+		g.setColor(Color.GREEN);
+		for (int row = 0; row < screen.length; row++) {
+			g.drawRect((row % 3) * WIDTH/SCREEN_WIDTH, (row / 3) * HEIGHT/(SCREEN_HEIGHT*8), WIDTH/SCREEN_WIDTH, HEIGHT/(SCREEN_HEIGHT*8));
+		}
+		
 		g.dispose();
 		bs.show();
 	}

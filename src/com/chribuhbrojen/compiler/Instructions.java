@@ -65,4 +65,25 @@ public enum Instructions {
 		this.hiAddr = hiAddr;
 		this.loAddr = loAddr;
 	}
+	
+	public static Instructions findInstruction(String byteInstr) {
+		byteInstr = byteInstr.length() == 2 ? byteInstr : ("0" + byteInstr);
+		byteInstr = byteInstr.toUpperCase();
+		
+		for (Instructions inst : Instructions.values()) {
+			for (char hi : inst.hiAddr) {
+				if (hi == byteInstr.charAt(0)) {
+					for (char lo : inst.loAddr) {
+						if (lo == byteInstr.charAt(1)) {
+							return inst;
+						}
+					}
+					
+					break;
+				}
+			}
+		}
+		
+		return null;
+	}
 }
