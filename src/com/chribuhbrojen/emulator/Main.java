@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 
 import com.chribuhbrojen.compiler.Compile;
 import com.chribuhbrojen.compiler.Instructions;
+import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
 
 public class Main implements Runnable {
 	public static Display display;
@@ -83,6 +84,12 @@ public class Main implements Runnable {
 			int instr = read(pc++);
 
 			System.out.println(Instructions.findInstruction(Integer.toHexString(instr)));
+			if (memory.RAM[0x05] * 3 + (memory.RAM[0x02] >> 3) != memory.RAM[0x0A]) {	
+				System.out.println("R: " + memory.RAM[0x0A]);
+				System.out.println("X: " + memory.RAM[0x02]);
+				System.out.println("Y: " + memory.RAM[0x05]);
+				System.out.println("C: " + (memory.RAM[0x05] * 3 + (memory.RAM[0x02] >> 3)));
+			}
 
 			switch(instr) {
 			case 0x00: //BRK impl
@@ -97,6 +104,10 @@ public class Main implements Runnable {
 				System.out.print("Flags: ");
 				for (int i = 0; i < 7-Integer.toBinaryString(flags.toInt()).length(); i++) System.out.print(0);
 				System.out.println(Integer.toBinaryString(flags.toInt()));
+				System.out.println("R: " + memory.RAM[0x0A]);
+				System.out.println("X: " + memory.RAM[0x02]);
+				System.out.println("Y: " + memory.RAM[0x05]);
+				
 				break;
 				
 			case 0x01: //ORA X,ind

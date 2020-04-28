@@ -18,6 +18,7 @@
 ; $000B: Ball interbyte value
 ; $00F4-$00FF: Level
 
+init:
 	;-----INIT-----
 	LDA #11		; Set paddle pos to center of screen
 	STA $00
@@ -48,7 +49,7 @@
 	LDA #$FF		; Load all ones into accumulator
 	LDX #0			; Set start of loop to 0
 initLvlLp:
-	STA $F4,X		; Store all ones to ram area designated to 
+	STA $F4,X		; Store all ones to ram area designated to level
 	INX				; Incriment row counter
 	CPX #$0C		; Test agains 12 (4 whole rows)
 	BNE initLvlLp
@@ -141,19 +142,22 @@ blXNeg:
 	JSR invBallXDir
 	CLC
 	LDA #0			; Set x position to 0
+	STA $02
 	
 blXPosi:
 	ADC #1			; Add one to balls position
 	STA $02
-	CMP #$18		; Check if ball position is greater than 48 (level width)
-	BCC blXOnScrn0	; If ball position is greter than 48 after addition, then ball hit right wall
+	CMP #$18		; Check if ball position is greater than 24 (level width)
+	BCC blXOnScrn0	; If ball position is greter than 24 after addition, then ball hit right wall
 	JSR invBallXDir
 	CLC
-	LDA #$17		; Set x position of ball to 47
+	LDA #$17		; Set x position of ball to 23
 	STA $02
 	JMP blXNeg		; Jump to negative direction code
 	
 blXOnScrn0:
+	LDA $0A			; Load ball row into accumulator
+	STA $10			; Store ball row to memory
 	LDA $0B			; Load ball pos to accumulator
 	TAY				; Transfer ball pos to Y
 	ASL A			; Move ball one right on screen
@@ -233,11 +237,12 @@ blYPosi:
 	STA $05
 	CMP #$10		; Check if ball position is greater than 16 (level height)
 	BCC blYOnScrn0	; If ball position is greter than 16 after addition, then ball hit bottom wall
-	JSR invBallYDir
-	CLC
-	LDA #$0F		; Set y position of ball to 15
-	STA $05
-	JMP blYNeg		; Jump to negative direction code
+	JMP init		; Reset game
+	;JSR invBallYDir
+	;CLC
+	;LDA #$0F		; Set y position of ball to 15
+	;STA $05
+	;JMP blYNeg		; Jump to negative direction code
 	
 blYOnScrn0:
 	LDA $0A			; Load ball row to accumulator
